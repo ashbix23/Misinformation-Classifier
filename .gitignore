@@ -1,0 +1,25 @@
+# === Data and Outputs ===
+data/
+models/
+*.csv
+*.tsv
+*.zip
+*.json
+*.pt
+*.bin
+*.npy
+*.pkl
+*.h5
+*.ckpt
+
+# === Cache and temporary files ===
+__pycache__/
+*.log
+*.tmp
+*.ipynb_checkpoints/
+.DS_Store
+
+# === Environment ===
+.env
+.venv/
+

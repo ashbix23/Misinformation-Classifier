@@ -1,0 +1,16 @@
+transformers>=4.43.0
+peft>=0.11.1
+accelerate>=0.30.0
+torch>=2.2.0
+scikit-learn>=1.4.0
+pandas>=2.2.0
+numpy>=1.26.0
+matplotlib>=3.8.0
+seaborn>=0.13.0
+jupyter>=1.0.0
+ipykernel>=6.29.0
+shap>=0.45.0
+pillow>=10.0.0
+flwr>=1.10.0
+regex
+
