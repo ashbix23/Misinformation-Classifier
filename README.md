@@ -6,102 +6,96 @@
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Status](https://img.shields.io/badge/status-Active-success.svg)
 
-A robust **Fake News Detection** system built using **RoBERTa** with **LoRA (Low-Rank Adaptation)** fine-tuning.
-This project fine-tunes large transformer models efficiently to detect misinformation across multiple datasets,
-focusing on **cross-domain generalization** between **FakeNews-Kaggle** and **LIAR** datasets.
+A high-performance **Fake News Detection** pipeline built on **RoBERTa** with **LoRA (Low-Rank Adaptation)** fine-tuning. The project demonstrates how parameter-efficient fine-tuning can deliver strong results even on limited compute, with a focus on **cross-domain generalization** across **FakeNews-Kaggle** and **LIAR** datasets.
 
 ---
 
 ## Table of Contents
 
-* [Overview](#overview)
-* [Project Goals](#project-goals)
-* [Pipeline Overview](#pipeline-overview)
-* [Repository Structure](#repository-structure)
-* [Setup Instructions](#setup-instructions)
-* [Usage](#usage)
-* [Results](#results)
-* [Key Learnings](#key-learnings)
-* [Future Improvements](#future-improvements)
-* [License](#license)
+- [Overview](#overview)
+- [Project Goals](#project-goals)
+- [Pipeline Overview](#pipeline-overview)
+- [Repository Structure](#repository-structure)
+- [Setup Instructions](#setup-instructions)
+- [Usage](#usage)
+- [Results](#results)
+- [Key Insights](#key-insights)
+- [Future Work](#future-work)
+- [License](#license)
 
 ---
 
 ## Overview
 
-This project explores fine-tuning of transformer-based models (RoBERTa) for fake news classification
-using lightweight **LoRA adapters** to reduce computational cost while maintaining accuracy.
-
-It combines multiple datasets—**FakeNews-Kaggle** and **LIAR**—to evaluate both **in-domain** and **cross-domain** generalization.
-The implementation emphasizes reproducibility, modularity, and clean experimentation practices.
+This project applies **Parameter-Efficient Fine-Tuning (PEFT)** using **LoRA** adapters on **RoBERTa-base**, enabling efficient adaptation of large language models for misinformation detection. It evaluates both **in-domain performance** (FakeNews-Kaggle) and **out-of-domain generalization** (LIAR dataset) to measure model robustness.
 
 ---
 
 ## Project Goals
 
-* Build a **reproducible end-to-end pipeline** for fake news detection
-* Fine-tune RoBERTa efficiently using **PEFT (Parameter-Efficient Fine-Tuning)**
-* Achieve **high F1-score** on FakeNews dataset with limited compute
-* Test **cross-domain robustness** using the LIAR dataset
-* Provide clear evaluation, visualization, and extendability for new datasets
+- Develop an **end-to-end reproducible pipeline** for fake news detection.
+- Fine-tune **RoBERTa** efficiently using **LoRA adapters**.
+- Benchmark **cross-domain performance** using both FakeNews and LIAR datasets.
+- Maintain lightweight training with **minimal GPU memory footprint**.
+- Provide structured evaluation metrics and results visualization.
 
 ---
 
-## ️ Pipeline Overview
+## Pipeline Overview
 
-| Stage                | Description                                                                       |
-| -------------------- | --------------------------------------------------------------------------------- |
-| **1. Data Fetching** | Automatically downloads, cleans, and structures datasets (FakeNews-Kaggle, LIAR). |
-| **2. Preprocessing** | Normalizes text, handles class imbalance, tokenizes using RoBERTa tokenizer.      |
-| **3. Model Setup**   | Initializes RoBERTa base model with LoRA adapters (via `peft` library).           |
-| **4. Training**      | Fine-tunes using mixed precision (AMP) with progress tracking and checkpointing.  |
-| **5. Evaluation**    | Computes accuracy, precision, recall, and F1-score across domains.                |
-| **6. Visualization** | Generates performance summaries and confusion matrices.                           |
+| Stage | Description |
+|--------|--------------|
+| **1. Data Fetching** | Downloads and preprocesses FakeNews-Kaggle and LIAR datasets. |
+| **2. Preprocessing** | Cleans text, encodes labels, and prepares train/val/test splits. |
+| **3. Model Setup** | Initializes RoBERTa-base with LoRA adapters using the PEFT library. |
+| **4. Training** | Fine-tunes model using mixed precision and checkpoint saving. |
+| **5. Evaluation** | Computes metrics (Accuracy, Precision, Recall, F1) across domains. |
 
 ---
 
-##  Repository Structure
+## Repository Structure
 
-```
+```bash
 FakeNews-Detection/
-│
 ├── src/
 │   ├── data/
-│   │   ├── fetch_datasets.py          # Downloads and processes the LIAR and FakeNews datasets
-│   │   ├── datasets.py                # Custom PyTorch Dataset class for tokenized inputs
-│   │   └── preprocess.py              # Text normalization, deduplication, and label encoding
+│   │   ├── fetch_datasets.py       # Fetch and prepare datasets (FakeNews, LIAR)
+│   │   ├── datasets.py             # PyTorch Dataset class
+│   │   └── preprocess.py           # Cleaning, tokenization, and encoding
 │   │
 │   ├── models/
-│   │   ├── text_model.py              # RoBERTa + LoRA model architecture
-│   │   ├── train_utils.py             # Training utilities and checkpoint saving
-│   │   └── eval_utils.py              # Evaluation metrics and reporting helpers
+│   │   ├── text_model.py           # RoBERTa + LoRA architecture
+│   │   └── train.py                # Training loop and checkpoint saving
 │   │
-│   └── train.py                       # CLI entry point for fine-tuning and training
+│   ├── evaluate.py                 # Evaluation script for performance metrics
+│   └── utils/
+│       ├── metrics.py              # Metric computation utilities
+│       └── seed.py                 # Reproducibility and seed setup
 │
 ├── notebooks/
-│   ├── 1_dataset_exploration.ipynb    # Data analysis and summary visualization
-│   ├── 2_training_lora.ipynb          # LoRA fine-tuning pipeline with progress tracking
-│   ├── 3_evaluation.ipynb             # Model evaluation and cross-domain testing
-│   └── 4_visualization.ipynb          # Performance visualization and explainability (post-SHAP)
+│   ├── 01_data_exploration.ipynb   # Dataset analysis and visualization
+│   ├── 02_model_training.ipynb     # LoRA fine-tuning workflow
+│   └── 03_model_evaluation.ipynb   # Performance evaluation and confusion matrix
 │
 ├── data/
-│   ├── raw/                           # Raw datasets (auto-downloaded)
-│   └── processed/                     # Cleaned, tokenized, and split data
+│   ├── raw/                        # Raw data (downloaded automatically)
+│   └── processed/                  # Cleaned and tokenized data splits
 │
 ├── models/
-│   ├── roberta_lora_multidomain_best/   # Best-performing fine-tuned model checkpoint
-│   ├── roberta_lora_multidomain_steps/  # Step-wise checkpoints during training
-│   ├── roberta_lora_multidomain_merged/ # Adapter-merged model for export or inference
-│   └── roberta_lora_multidomain_history.csv  # Training metrics log
+│   ├── roberta_lora_multidomain_best/   # Best-performing model checkpoint
+│   ├── roberta_lora_multidomain_steps/  # Step-based checkpoints
+│   ├── roberta_lora_multidomain_merged/ # Final merged adapter model
+│   ├── roberta_lora_multidomain_history.csv # Training history log
+│   └── roberta_lora_multidomain_evaluation_summary.csv # Evaluation summary
 │
-├── requirements.txt                   # Python dependencies
-├── LICENSE                            # MIT License
-└── README.md                          # Project documentation
+├── requirements.txt                # Python dependencies
+├── Makefile                        # Reproducible training commands
+└── README.md                       # Project documentation
 ```
 
 ---
 
-##  Setup Instructions
+## Setup Instructions
 
 ### 1. Clone the Repository
 
@@ -110,7 +104,7 @@ git clone https://github.com/<your-username>/FakeNews-Detection.git
 cd FakeNews-Detection
 ```
 
-### 2. Create and Activate the Environment
+### 2. Create a Virtual Environment
 
 ```bash
 conda create -n fakenews python=3.10 -y
@@ -123,95 +117,84 @@ conda activate fakenews
 pip install -r requirements.txt
 ```
 
-### 4. Verify Dataset Download and Processing
+### 4. Download and Preprocess Data
 
 ```bash
 python -m src.data.fetch_datasets
 ```
 
-This command automatically fetches the LIAR and FakeNews-Kaggle datasets, cleans them,
-and stores processed CSV files in the `data/processed/` folder.
+This script downloads, cleans, and processes both FakeNews-Kaggle and LIAR datasets, saving ready-to-use files in `data/processed/`.
 
 ---
 
-##  Usage
+## Usage
 
-### 1. Dataset Exploration
-
-Explore class balance, average text lengths, and data quality:
+### 1. Explore the Data
 
 ```bash
-jupyter notebook notebooks/1_dataset_exploration.ipynb
+jupyter notebook notebooks/01_data_exploration.ipynb
 ```
 
-### 2. Fine-Tune the Model
-
-Train the LoRA-adapted RoBERTa model across domains:
+### 2. Train the Model
 
 ```bash
 python -m src.train --model roberta-base --lora --datasets FakeNews LIAR
 ```
 
-You can adjust hyperparameters directly in the notebook `2_training_lora.ipynb`.
-
 ### 3. Evaluate the Model
 
 ```bash
-jupyter notebook notebooks/3_evaluation.ipynb
+jupyter notebook notebooks/03_model_evaluation.ipynb
 ```
 
-This notebook loads the best-performing checkpoint, evaluates across both datasets,
-and generates a detailed classification report and metric table.
-
+This notebook generates accuracy, precision, recall, F1, and confusion matrices for each dataset.
 
 ---
 
-##  Results Summary
+## Results
 
-| Dataset      | Accuracy | Precision | Recall | F1     |
-| ------------ | -------- | --------- | ------ | ------ |
-| **FakeNews** | 0.7729   | 0.8458    | 0.7729 | 0.7633 |
-| **LIAR**     | 0.4431   | 0.7535    | 0.4431 | 0.2731 |
+| Dataset | Accuracy | Precision | Recall | F1 |
+|----------|-----------|------------|---------|---------|
+| **FakeNews** | 0.773 | 0.846 | 0.773 | 0.763 |
+| **LIAR** | 0.443 | 0.754 | 0.443 | 0.273 |
 
 ### Interpretation
 
-* Strong, consistent performance on **FakeNews-Kaggle** with balanced precision–recall.
-* Limited cross-domain generalization on **LIAR** due to short-form factual claims.
-* Model effectively learns **contextual and stylistic** signals of misinformation.
+- Excellent **in-domain** performance on FakeNews-Kaggle.
+- Significant drop in **cross-domain generalization** for LIAR (short factual claims).
+- Model learns strong **contextual and linguistic cues** for misinformation.
 
 ---
 
-##  Key Learnings
+## Key Insights
 
-* **LoRA fine-tuning** reduces GPU memory requirements and speeds up training significantly.
-* **Domain alignment** matters: models trained on article-level data struggle on short claims.
-* **Mixed precision (AMP)** offers substantial performance gains on CUDA-enabled systems.
-* Clean preprocessing and text normalization critically affect cross-dataset results.
-
----
-
-##  Future Improvements
-
-* Integrate **domain-adaptive fine-tuning** for short factual claims (LIAR).
-* Add **multi-dataset merging** and balanced sampling utilities.
-* Introduce a lightweight **inference API** using `FastAPI` for real-world testing.
+- **LoRA fine-tuning** reduces memory and compute cost while preserving model quality.
+- **Cross-domain adaptation** remains challenging due to dataset structural differences.
+- **Clean preprocessing and normalization** dramatically improve results.
+- **Mixed Precision Training (AMP)** enhances training efficiency on GPUs.
 
 ---
 
-##  License
+## Future Work
 
-This project is licensed under the [MIT License](LICENSE).
-You’re free to use, modify, and distribute this repository for academic or research purposes.
+- Domain-adaptive fine-tuning for short-form factual claims.
+- Add more datasets for multi-domain robustness.
+- Build an **inference API** using FastAPI or Gradio for quick model testing.
+
+---
+
+## License
+
+This project is licensed under the **MIT License**. You are free to use, modify, and distribute it for academic or research purposes.
 
 ---
 
-##  Acknowledgments
+## Acknowledgments
 
-* [Hugging Face Transformers](https://huggingface.co/transformers/)
-* [PEFT (Parameter-Efficient Fine-Tuning)](https://github.com/huggingface/peft)
-* [PyTorch](https://pytorch.org/)
-* [FakeNews-Kaggle Dataset](https://www.kaggle.com/datasets/clmentbisaillon/fake-and-real-news-dataset)
-* [LIAR Dataset](https://aclanthology.org/P17-2067/)
+- [Hugging Face Transformers](https://huggingface.co/transformers/)
+- [PEFT (Parameter-Efficient Fine-Tuning)](https://github.com/huggingface/peft)
+- [PyTorch](https://pytorch.org/)
+- [FakeNews-Kaggle Dataset](https://www.kaggle.com/datasets/clmentbisaillon/fake-and-real-news-dataset)
+- [LIAR Dataset](https://aclanthology.org/P17-2067/)
 
----
 
