@@ -56,7 +56,7 @@ This project applies **Parameter-Efficient Fine-Tuning (PEFT)** using **LoRA** a
 ## Repository Structure
 
 ```bash
-FakeNews-Detection/
+Misinformation-Classifier/
 ├── src/
 │   ├── data/
 │   │   ├── fetch_datasets.py       # Fetch and prepare datasets (FakeNews, LIAR)
