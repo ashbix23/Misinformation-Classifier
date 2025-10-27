@@ -100,8 +100,8 @@ FakeNews-Detection/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/<your-username>/FakeNews-Detection.git
-cd FakeNews-Detection
+git clone https://github.com/ashbix23/Misinformation-Classifier.git
+cd Misinformation-Classifier
 ```
 
 ### 2. Create a Virtual Environment
